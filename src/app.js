@@ -1,11 +1,11 @@
 import {http} from "./http";
 import {ui} from "./ui";
 
-// GET posts on DOM load
 document.addEventListener('DOMContentLoaded', getPosts);
 
-// Listen for add post
 document.querySelector('.post-submit').addEventListener('click', submitPost);
+
+document.getElementById('posts').addEventListener('click', deletePost);
 
 function getPosts() {
     http.get('http://localhost:3000/posts')
@@ -23,10 +23,26 @@ function submitPost() {
     }
 
     http.post('http://localhost:3000/posts', data)
-        .then(data => {
+        .then(() => {
             ui.showAlert('Post added', 'alert alert-dismissible alert-success');
             ui.clearFields();
             getPosts();
         })
         .catch(err => console.log(err));
+}
+
+function deletePost(event) {
+    event.preventDefault();
+
+    if(event.target.parentElement.classList.contains('delete')) {
+        const id = event.target.parentElement.dataset.id;
+        if(confirm('Are you sure?')) {
+            http.delete(`http://localhost:3000/posts/${id}`)
+                .then(() => {
+                    ui.showAlert('Post removed', 'alert alert-dismissible alert-warning');
+                    getPosts();
+                })
+                .catch(err => console.log(err));
+        }
+    }
 }
